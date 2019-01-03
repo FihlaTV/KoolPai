@@ -25,7 +25,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.blankj.utilcode.constant.PermissionConstants;
-import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.PermissionUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.qiniu.csvc.R;
@@ -98,7 +97,6 @@ public class ShortVideoActivity extends BaseActivity implements PLRecordStateLis
     @BindView(R.id.bottom_control_panel) LinearLayout mBottomControlPanel;
 
     private PLShortVideoRecorder mShortVideoRecorder;
-
     private boolean mSectionBegan;
     private double mRecordSpeed;
     private Stack<Long> mDurationRecordStack = new Stack();
@@ -234,7 +232,6 @@ public class ShortVideoActivity extends BaseActivity implements PLRecordStateLis
         mSectionProgressBar.setProceedingSpeed(mRecordSpeed);
         mSectionProgressBar.setTotalTime(this, mRecordSetting.getMaxRecordDuration());
 
-
         mRecordBtn.setOnTouchListener(new View.OnTouchListener() {
             private long mSectionBeginTSMs;
 
@@ -322,6 +319,11 @@ public class ShortVideoActivity extends BaseActivity implements PLRecordStateLis
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mShortVideoRecorder != null) {
@@ -343,7 +345,6 @@ public class ShortVideoActivity extends BaseActivity implements PLRecordStateLis
         }
         return screenRotation;
     }
-
 
     private PLCameraSetting.CAMERA_FACING_ID chooseCameraFacingId() {
         if (PLCameraSetting.hasCameraFacing(PLCameraSetting.CAMERA_FACING_ID.CAMERA_FACING_3RD)) {
@@ -395,54 +396,10 @@ public class ShortVideoActivity extends BaseActivity implements PLRecordStateLis
         mAdjustBrightnessSeekBar.setProgress(Math.abs(min));
     }
 
-    @OnClick(R.id.record)
-    public void startRecord() {
-        mRecordBtn.setOnTouchListener(new View.OnTouchListener() {
-            private long mSectionBeginTSMs;
-
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                int action = event.getAction();
-                if (action == MotionEvent.ACTION_DOWN) {
-                    if (!mSectionBegan && mShortVideoRecorder.beginSection()) {
-                        mSectionBegan = true;
-                        mSectionBeginTSMs = System.currentTimeMillis();
-                        mSectionProgressBar.setCurrentState(SectionProgressBar.State.START);
-                        updateRecordingBtns(true);
-                    } else {
-                        ToastUtils.showShort("无法开始视频段录制");
-                    }
-                } else if (action == MotionEvent.ACTION_UP) {
-                    if (mSectionBegan) {
-                        long sectionRecordDurationMs = System.currentTimeMillis() - mSectionBeginTSMs;
-                        long totalRecordDurationMs = sectionRecordDurationMs + (mDurationRecordStack.isEmpty() ? 0 : mDurationRecordStack.peek().longValue());
-                        double sectionVideoDurationMs = sectionRecordDurationMs / mRecordSpeed;
-                        double totalVideoDurationMs = sectionVideoDurationMs + (mDurationVideoStack.isEmpty() ? 0 : mDurationVideoStack.peek().doubleValue());
-                        mDurationRecordStack.push(new Long(totalRecordDurationMs));
-                        mDurationVideoStack.push(new Double(totalVideoDurationMs));
-                        if (mRecordSetting.IsRecordSpeedVariable()) {
-                            LogUtils.d("SectionRecordDuration: " + sectionRecordDurationMs + "; sectionVideoDuration: " + sectionVideoDurationMs + "; totalVideoDurationMs: " + totalVideoDurationMs + "Section count: " + mDurationVideoStack.size());
-                            mSectionProgressBar.addBreakPointTime((long) totalVideoDurationMs);
-                        } else {
-                            mSectionProgressBar.addBreakPointTime(totalRecordDurationMs);
-                        }
-
-                        mSectionProgressBar.setCurrentState(SectionProgressBar.State.PAUSE);
-                        mShortVideoRecorder.endSection();
-                        mSectionBegan = false;
-                    }
-                }
-
-                return false;
-            }
-        });
-    }
-
     private void updateRecordingBtns(boolean isRecording) {
         mSwitchCameraBtn.setEnabled(!isRecording);
         mRecordBtn.setActivated(isRecording);
     }
-
 
     @OnClick(R.id.screen_rotate_button)
     public void onScreenRotation(View v) {
@@ -482,7 +439,7 @@ public class ShortVideoActivity extends BaseActivity implements PLRecordStateLis
         builder.create().show();
     }
 
-    @OnClick(R.id.super_slow_speed_text)
+    @OnClick({R.id.super_slow_speed_text, R.id.slow_speed_text, R.id.normal_speed_text, R.id.fast_speed_text, R.id.super_fast_speed_text})
     public void onSpeedClicked(View view) {
         if (!mVideoEncodeSetting.IsConstFrameRateEnabled() || !mRecordSetting.IsRecordSpeedVariable()) {
             if (mSectionProgressBar.isRecorded()) {

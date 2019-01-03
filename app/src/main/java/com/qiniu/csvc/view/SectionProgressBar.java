@@ -9,6 +9,9 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
 
+import com.qiniu.csvc.R;
+import com.qiniu.csvc.utils.ResourceUtil;
+
 import java.util.LinkedList;
 
 public class SectionProgressBar extends View {
@@ -111,21 +114,15 @@ public class SectionProgressBar extends View {
         mProgressBarPaint = new Paint();
         mFirstPointPaint = new Paint();
         mBreakPointPaint = new Paint();
-
-        setBackgroundColor(Color.parseColor("#161823"));
-
+        setBackgroundColor(ResourceUtil.getColor(R.color.transparent));
         mProgressBarPaint.setStyle(Paint.Style.FILL);
         mProgressBarPaint.setColor(Color.parseColor("#ff0097"));
-
         mCursorPaint.setStyle(Paint.Style.FILL);
         mCursorPaint.setColor(Color.parseColor("#ffffff"));
-
         mFirstPointPaint.setStyle(Paint.Style.FILL);
         mFirstPointPaint.setColor(Color.parseColor("#622a1d"));
-
         mBreakPointPaint.setStyle(Paint.Style.FILL);
         mBreakPointPaint.setColor(Color.parseColor("#000000"));
-
         setTotalTime(paramContext, DEFAULT_TOTAL_TIME);
     }
 
