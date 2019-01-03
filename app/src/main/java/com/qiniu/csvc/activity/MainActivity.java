@@ -32,7 +32,7 @@ public class MainActivity extends BaseActivity {
     }
 
     public void getPermission() {
-        PermissionUtils.permission(PermissionConstants.CAMERA, PermissionConstants.MICROPHONE)
+        PermissionUtils.permission(PermissionConstants.CAMERA, PermissionConstants.MICROPHONE, PermissionConstants.STORAGE)
                 .rationale(new PermissionUtils.OnRationaleListener() {
                     @Override
                     public void rationale(final ShouldRequest shouldRequest) {
